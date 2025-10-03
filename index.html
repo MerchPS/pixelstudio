@@ -284,6 +284,12 @@
             transform: translateX(0);
         }
         
+        .ai-status {
+            margin-top: 10px;
+            font-style: italic;
+            text-align: center;
+        }
+        
         footer {
             text-align: center;
             margin-top: 40px;
@@ -337,9 +343,10 @@
             <div class="ai-section">
                 <h2 class="section-title">AI Designer</h2>
                 
-                <textarea class="ai-prompt" id="ai-prompt" placeholder="Deskripsikan item yang ingin Anda buat, misalnya: 'Buatkan wings dengan tema api berwarna oranye dan merah'"></textarea>
+                <textarea class="ai-prompt" id="ai-prompt" placeholder="Deskripsikan item yang ingin Anda buat, misalnya: 'Buatkan pedang dengan efek api berwarna oranye dan merah'">Pedang dengan efek api berwarna oranye</textarea>
                 
                 <button class="generate-btn" id="generate-btn">Generate dengan AI</button>
+                <div class="ai-status" id="ai-status">Siap untuk membuat desain pedang api yang realistis!</div>
                 
                 <h3 class="section-title">Saran Cepat</h3>
                 <div class="ai-suggestions">
@@ -347,7 +354,7 @@
                     <div class="suggestion" data-prompt="Wings dengan tema naga berwarna merah dan hitam">Wings Naga</div>
                     <div class="suggestion" data-prompt="Wings dengan tema es berwarna biru dan putih">Wings Es</div>
                     <div class="suggestion" data-prompt="Topi dengan tema peri berwarna hijau dan ungu">Topi Peri</div>
-                    <div class="suggestion" data-prompt="Pedang dengan efek api berwarna oranye">Pedang Api</div>
+                    <div class="suggestion" data-prompt="Pedang dengan efek api berwarna oranye dan merah">Pedang Api</div>
                     <div class="suggestion" data-prompt="Perisai dengan tema kristal berwarna biru">Perisai Kristal</div>
                 </div>
             </div>
@@ -411,7 +418,7 @@
         // Color palette
         const colors = [
             '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF',
-            '#FFA500', '#800080', '#FFC0CB', '#A52A2A', '#FFFFFF', '#000000',
+            '#FF4500', '#800080', '#FFC0CB', '#A52A2A', '#FFFFFF', '#000000',
             '#808080', '#C0C0C0', '#800000', '#808000', '#008000', '#800080',
             '#008080', '#000080', '#FF4500', '#DA70D6', '#EEE8AA', '#98FB98',
             '#AFEEEE', '#DDA0DD', '#FFD700', '#F0E68C', '#E6E6FA', '#FFB6C1'
@@ -703,20 +710,23 @@
             
             // Show loading state
             const generateBtn = document.getElementById('generate-btn');
+            const aiStatus = document.getElementById('ai-status');
             generateBtn.textContent = 'Generating...';
             generateBtn.disabled = true;
+            aiStatus.textContent = "AI sedang menganalisis prompt dan membuat desain...";
             
             // Simulate AI generation (in a real app, this would call an API)
             setTimeout(() => {
-                // Generate random pixel art based on prompt
+                // Generate pixel art based on prompt
                 generatePixelArtFromPrompt(prompt);
                 
                 // Reset button
                 generateBtn.textContent = 'Generate dengan AI';
                 generateBtn.disabled = false;
+                aiStatus.textContent = "Desain berhasil dibuat! Anda bisa mengeditnya lebih lanjut.";
                 
                 showNotification('Item berhasil di-generate dengan AI!');
-            }, 1500);
+            }, 2000);
         }
         
         // Generate pixel art based on prompt
@@ -731,25 +741,31 @@
             let baseColors = [];
             
             if (lowerPrompt.includes('api') || lowerPrompt.includes('fire')) {
-                baseColors = ['#FF4500', '#FF0000', '#FFA500', '#FFFF00'];
+                baseColors = ['#FF4500', '#FF0000', '#FFA500', '#FFFF00', '#8B0000'];
             } else if (lowerPrompt.includes('es') || lowerPrompt.includes('ice')) {
-                baseColors = ['#87CEEB', '#ADD8E6', '#0000FF', '#FFFFFF'];
+                baseColors = ['#87CEEB', '#ADD8E6', '#0000FF', '#FFFFFF', '#1E90FF'];
             } else if (lowerPrompt.includes('air') || lowerPrompt.includes('sky')) {
-                baseColors = ['#87CEEB', '#ADD8E6', '#FFFFFF', '#1E90FF'];
+                baseColors = ['#87CEEB', '#ADD8E6', '#FFFFFF', '#1E90FF', '#00BFFF'];
             } else if (lowerPrompt.includes('earth') || lowerPrompt.includes('tanah')) {
-                baseColors = ['#8B4513', '#A0522D', '#CD853F', '#D2691E'];
+                baseColors = ['#8B4513', '#A0522D', '#CD853F', '#D2691E', '#654321'];
             } else if (lowerPrompt.includes('hijau') || lowerPrompt.includes('green')) {
-                baseColors = ['#008000', '#32CD32', '#90EE90', '#00FF00'];
+                baseColors = ['#008000', '#32CD32', '#90EE90', '#00FF00', '#006400'];
             } else if (lowerPrompt.includes('ungu') || lowerPrompt.includes('purple')) {
-                baseColors = ['#800080', '#9370DB', '#DA70D6', '#EE82EE'];
+                baseColors = ['#800080', '#9370DB', '#DA70D6', '#EE82EE', '#4B0082'];
             } else {
                 // Default random colors
                 baseColors = ['#FF4500', '#32CD32', '#1E90FF', '#FFD700', '#DA70D6', '#00CED1'];
             }
             
-            // Generate symmetric wings if prompt includes wings
-            if (lowerPrompt.includes('wings') || lowerPrompt.includes('sayap')) {
+            // Generate specific items based on prompt
+            if (lowerPrompt.includes('pedang') && lowerPrompt.includes('api')) {
+                generateFireSword(baseColors);
+            } else if (lowerPrompt.includes('wings') || lowerPrompt.includes('sayap')) {
                 generateWings(baseColors);
+            } else if (lowerPrompt.includes('topi') || lowerPrompt.includes('hat')) {
+                generateHat(baseColors);
+            } else if (lowerPrompt.includes('perisai') || lowerPrompt.includes('shield')) {
+                generateShield(baseColors);
             } else {
                 // Generate random shape
                 generateRandomShape(baseColors);
@@ -757,6 +773,84 @@
             
             // Redraw canvas
             redrawCanvas();
+        }
+        
+        // Generate fire sword
+        function generateFireSword(baseColors) {
+            const centerX = Math.floor(GRID_SIZE / 2);
+            
+            // Sword blade (vertical)
+            for (let y = 8; y < 24; y++) {
+                for (let x = centerX - 1; x <= centerX + 1; x++) {
+                    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+                        // Blade gradient - darker at base, brighter at tip
+                        let colorIndex;
+                        if (y < 12) {
+                            colorIndex = 4; // Dark red at base
+                        } else if (y < 16) {
+                            colorIndex = 0; // Bright red
+                        } else if (y < 20) {
+                            colorIndex = 2; // Orange
+                        } else {
+                            colorIndex = 3; // Yellow at tip
+                        }
+                        
+                        getCurrentLayer().data[y][x] = baseColors[colorIndex];
+                    }
+                }
+            }
+            
+            // Sword hilt
+            for (let y = 5; y < 8; y++) {
+                for (let x = centerX - 2; x <= centerX + 2; x++) {
+                    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+                        getCurrentLayer().data[y][x] = '#8B4513'; // Brown for hilt
+                    }
+                }
+            }
+            
+            // Sword guard
+            for (let x = centerX - 3; x <= centerX + 3; x++) {
+                if (x >= 0 && x < GRID_SIZE) {
+                    getCurrentLayer().data[8][x] = '#C0C0C0'; // Silver for guard
+                }
+            }
+            
+            // Fire effect around the blade
+            for (let y = 12; y < 24; y++) {
+                for (let x = centerX - 3; x <= centerX + 3; x++) {
+                    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE && 
+                        (x < centerX - 1 || x > centerX + 1)) {
+                        
+                        // Random fire pixels with probability based on distance from blade
+                        const distFromCenter = Math.abs(x - centerX);
+                        const fireProbability = 0.7 - (distFromCenter * 0.15);
+                        
+                        if (Math.random() < fireProbability) {
+                            // Fire color based on distance
+                            let colorIndex;
+                            if (distFromCenter === 2) {
+                                colorIndex = Math.random() < 0.7 ? 0 : 2; // Mostly red, some orange
+                            } else {
+                                colorIndex = Math.random() < 0.5 ? 2 : 3; // Orange and yellow
+                            }
+                            
+                            getCurrentLayer().data[y][x] = baseColors[colorIndex];
+                        }
+                    }
+                }
+            }
+            
+            // Add some fire particles above the sword
+            for (let i = 0; i < 15; i++) {
+                const x = centerX - 2 + Math.floor(Math.random() * 5);
+                const y = 4 + Math.floor(Math.random() * 4);
+                
+                if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+                    const colorIndex = Math.random() < 0.3 ? 3 : 2; // Yellow or orange
+                    getCurrentLayer().data[y][x] = baseColors[colorIndex];
+                }
+            }
         }
         
         // Generate wings shape
@@ -779,6 +873,67 @@
                             const mirrorX = GRID_SIZE - 1 - x;
                             getCurrentLayer().data[y][mirrorX] = baseColors[colorIndex];
                         }
+                    }
+                }
+            }
+        }
+        
+        // Generate hat
+        function generateHat(baseColors) {
+            const centerX = Math.floor(GRID_SIZE / 2);
+            
+            // Hat brim
+            for (let x = centerX - 6; x <= centerX + 6; x++) {
+                if (x >= 0 && x < GRID_SIZE) {
+                    getCurrentLayer().data[18][x] = baseColors[0];
+                }
+            }
+            
+            // Hat body
+            for (let y = 12; y < 18; y++) {
+                for (let x = centerX - 4; x <= centerX + 4; x++) {
+                    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+                        getCurrentLayer().data[y][x] = baseColors[1];
+                    }
+                }
+            }
+            
+            // Hat tip
+            for (let y = 8; y < 12; y++) {
+                for (let x = centerX - 2; x <= centerX + 2; x++) {
+                    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+                        getCurrentLayer().data[y][x] = baseColors[2];
+                    }
+                }
+            }
+        }
+        
+        // Generate shield
+        function generateShield(baseColors) {
+            const centerX = Math.floor(GRID_SIZE / 2);
+            const centerY = Math.floor(GRID_SIZE / 2);
+            
+            // Shield shape (rounded rectangle)
+            for (let y = 8; y < 24; y++) {
+                for (let x = centerX - 6; x <= centerX + 6; x++) {
+                    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+                        // Create rounded corners
+                        const inCorner = 
+                            (y < 10 && (x < centerX - 4 || x > centerX + 4)) ||
+                            (y > 22 && (x < centerX - 4 || x > centerX + 4));
+                        
+                        if (!inCorner) {
+                            getCurrentLayer().data[y][x] = baseColors[0];
+                        }
+                    }
+                }
+            }
+            
+            // Shield details
+            for (let y = 12; y < 20; y++) {
+                for (let x = centerX - 2; x <= centerX + 2; x++) {
+                    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+                        getCurrentLayer().data[y][x] = baseColors[1];
                     }
                 }
             }
@@ -832,12 +987,10 @@
         initCanvas();
         initColorPicker();
         
-        // Add some sample pixels for demonstration
+        // Generate a sample fire sword on load
         setTimeout(() => {
-            // Draw a simple sample
-            for (let i = 10; i < 22; i++) {
-                drawPixel(i * PIXEL_SIZE, 16 * PIXEL_SIZE, '#FF4500');
-            }
+            generateFireSword(['#FF4500', '#FF0000', '#FFA500', '#FFFF00', '#8B0000']);
+            redrawCanvas();
         }, 500);
     </script>
 </body>
