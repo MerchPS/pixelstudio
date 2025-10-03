@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Editor - Custom Growtopia Items</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .editor-section, .ai-section {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #fdbb2d;
+            padding-bottom: 8px;
+        }
+        
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        #pixel-canvas {
+            border: 2px solid #fdbb2d;
+            background-color: #222;
+            image-rendering: pixelated;
+            margin-bottom: 15px;
+        }
+        
+        .tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .tool-btn {
+            background: #fdbb2d;
+            border: none;
+            color: #1a2a6c;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .tool-btn:hover {
+            background: #ffcc44;
+            transform: translateY(-2px);
+        }
+        
+        .tool-btn.active {
+            background: #1a2a6c;
+            color: white;
+        }
+        
+        .color-picker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.2s;
+        }
+        
+        .color:hover {
+            transform: scale(1.2);
+        }
+        
+        .color.active {
+            border-color: white;
+            transform: scale(1.2);
+        }
+        
+        .layer-controls {
+            margin-top: 20px;
+        }
+        
+        .layer-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .layer-btn {
+            background: #b21f1f;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .ai-prompt {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #fdbb2d;
+            color: white;
+            margin-bottom: 15px;
+            resize: vertical;
+        }
+        
+        .ai-prompt::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .generate-btn {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .ai-suggestions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .suggestion {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .suggestion:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        .preview-section {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .preview-title {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+        
+        .preview-canvas {
+            border: 2px solid #fdbb2d;
+            background-color: #222;
+            image-rendering: pixelated;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        .export-btn {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        
+        .export-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .animation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .fps-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .fps-input {
+            width: 50px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #fdbb2d;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-align: center;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            transform: translateX(150%);
+            transition: transform 0.5s;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pixel Editor - Custom Growtopia Items</h1>
+            <p class="subtitle">Buat item kustom 32x32 pixel dengan AI dan animasi multi-layer</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="editor-section">
+                <h2 class="section-title">Editor Pixel</h2>
+                
+                <div class="canvas-container">
+                    <canvas id="pixel-canvas" width="320" height="320"></canvas>
+                    
+                    <div class="tools">
+                        <button class="tool-btn active" id="pencil-tool">Pensil</button>
+                        <button class="tool-btn" id="fill-tool">Isi</button>
+                        <button class="tool-btn" id="eraser-tool">Penghapus</button>
+                        <button class="tool-btn" id="clear-tool">Bersihkan</button>
+                    </div>
+                    
+                    <div class="color-picker" id="color-picker">
+                        <!-- Colors will be generated by JavaScript -->
+                    </div>
+                    
+                    <div class="layer-controls">
+                        <div class="layer-info">
+                            <span>Layer: <span id="current-layer">1</span>/6</span>
+                            <button class="layer-btn" id="add-layer">Tambah Layer</button>
+                        </div>
+                        <div class="animation-controls">
+                            <div class="fps-control">
+                                <label for="fps-input">FPS:</label>
+                                <input type="number" id="fps-input" class="fps-input" value="6" min="1" max="30">
+                            </div>
+                            <button class="tool-btn" id="play-animation">Putar Animasi</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ai-section">
+                <h2 class="section-title">AI Designer</h2>
+                
+                <textarea class="ai-prompt" id="ai-prompt" placeholder="Deskripsikan item yang ingin Anda buat, misalnya: 'Buatkan wings dengan tema api berwarna oranye dan merah'"></textarea>
+                
+                <button class="generate-btn" id="generate-btn">Generate dengan AI</button>
+                
+                <h3 class="section-title">Saran Cepat</h3>
+                <div class="ai-suggestions">
+                    <div class="suggestion" data-prompt="Wings dengan tema malaikat berwarna putih dan emas">Wings Malaikat</div>
+                    <div class="suggestion" data-prompt="Wings dengan tema naga berwarna merah dan hitam">Wings Naga</div>
+                    <div class="suggestion" data-prompt="Wings dengan tema es berwarna biru dan putih">Wings Es</div>
+                    <div class="suggestion" data-prompt="Topi dengan tema peri berwarna hijau dan ungu">Topi Peri</div>
+                    <div class="suggestion" data-prompt="Pedang dengan efek api berwarna oranye">Pedang Api</div>
+                    <div class="suggestion" data-prompt="Perisai dengan tema kristal berwarna biru">Perisai Kristal</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="preview-section">
+            <h2 class="preview-title">Preview Item</h2>
+            <canvas id="preview-canvas" width="320" height="320"></canvas>
+            <button class="export-btn" id="export-btn">Export Item</button>
+        </div>
+        
+        <footer>
+            <p>Pixel Editor untuk Custom Growtopia Items &copy; 2023</p>
+        </footer>
+    </div>
+    
+    <div class="notification" id="notification">
+        Item berhasil di-generate dengan AI!
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('pixel-canvas');
+        const ctx = canvas.getContext('2d');
+        const previewCanvas = document.getElementById('preview-canvas');
+        const previewCtx = previewCanvas.getContext('2d');
+        
+        // Canvas dimensions
+        const PIXEL_SIZE = 10; // Each pixel is 10x10 on screen
+        const GRID_SIZE = 32; // 32x32 grid
+        
+        // Initialize canvas
+        function initCanvas() {
+            // Draw grid
+            ctx.fillStyle = '#222';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid lines
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            for (let x = 0; x <= GRID_SIZE; x++) {
+                ctx.beginPath();
+                ctx.moveTo(x * PIXEL_SIZE, 0);
+                ctx.lineTo(x * PIXEL_SIZE, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y <= GRID_SIZE; y++) {
+                ctx.beginPath();
+                ctx.moveTo(0, y * PIXEL_SIZE);
+                ctx.lineTo(canvas.width, y * PIXEL_SIZE);
+                ctx.stroke();
+            }
+            
+            // Initialize preview
+            previewCtx.fillStyle = '#222';
+            previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+        }
+        
+        // Color palette
+        const colors = [
+            '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF',
+            '#FFA500', '#800080', '#FFC0CB', '#A52A2A', '#FFFFFF', '#000000',
+            '#808080', '#C0C0C0', '#800000', '#808000', '#008000', '#800080',
+            '#008080', '#000080', '#FF4500', '#DA70D6', '#EEE8AA', '#98FB98',
+            '#AFEEEE', '#DDA0DD', '#FFD700', '#F0E68C', '#E6E6FA', '#FFB6C1'
+        ];
+        
+        // Initialize color picker
+        function initColorPicker() {
+            const colorPicker = document.getElementById('color-picker');
+            
+            colors.forEach(color => {
+                const colorElement = document.createElement('div');
+                colorElement.className = 'color';
+                colorElement.style.backgroundColor = color;
+                colorElement.dataset.color = color;
+                
+                colorElement.addEventListener('click', () => {
+                    document.querySelectorAll('.color').forEach(c => c.classList.remove('active'));
+                    colorElement.classList.add('active');
+                    currentColor = color;
+                });
+                
+                colorPicker.appendChild(colorElement);
+            });
+            
+            // Set first color as active
+            document.querySelector('.color').classList.add('active');
+        }
+        
+        // Drawing variables
+        let currentColor = colors[0];
+        let isDrawing = false;
+        let currentTool = 'pencil';
+        let layers = [createEmptyLayer()];
+        let currentLayerIndex = 0;
+        let animationInterval = null;
+        
+        // Create empty layer
+        function createEmptyLayer() {
+            return {
+                data: Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(null)),
+                visible: true
+            };
+        }
+        
+        // Get current layer
+        function getCurrentLayer() {
+            return layers[currentLayerIndex];
+        }
+        
+        // Draw pixel on canvas
+        function drawPixel(x, y, color = null) {
+            if (!color) color = currentColor;
+            
+            const gridX = Math.floor(x / PIXEL_SIZE);
+            const gridY = Math.floor(y / PIXEL_SIZE);
+            
+            if (gridX >= 0 && gridX < GRID_SIZE && gridY >= 0 && gridY < GRID_SIZE) {
+                // Update layer data
+                getCurrentLayer().data[gridY][gridX] = color;
+                
+                // Redraw canvas
+                redrawCanvas();
+            }
+        }
+        
+        // Fill area with color
+        function fillArea(x, y, targetColor, fillColor) {
+            const gridX = Math.floor(x / PIXEL_SIZE);
+            const gridY = Math.floor(y / PIXEL_SIZE);
+            
+            if (gridX < 0 || gridX >= GRID_SIZE || gridY < 0 || gridY >= GRID_SIZE) return;
+            
+            const currentPixelColor = getCurrentLayer().data[gridY][gridX];
+            
+            // If the current pixel is already the fill color or not the target color, return
+            if (currentPixelColor === fillColor || currentPixelColor !== targetColor) return;
+            
+            // Set the fill color
+            getCurrentLayer().data[gridY][gridX] = fillColor;
+            
+            // Recursively fill adjacent pixels
+            fillArea(x - PIXEL_SIZE, y, targetColor, fillColor); // Left
+            fillArea(x + PIXEL_SIZE, y, targetColor, fillColor); // Right
+            fillArea(x, y - PIXEL_SIZE, targetColor, fillColor); // Up
+            fillArea(x, y + PIXEL_SIZE, targetColor, fillColor); // Down
+            
+            // Redraw canvas after fill
+            redrawCanvas();
+        }
+        
+        // Redraw entire canvas
+        function redrawCanvas() {
+            // Clear canvas
+            ctx.fillStyle = '#222';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid lines
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            for (let x = 0; x <= GRID_SIZE; x++) {
+                ctx.beginPath();
+                ctx.moveTo(x * PIXEL_SIZE, 0);
+                ctx.lineTo(x * PIXEL_SIZE, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y <= GRID_SIZE; y++) {
+                ctx.beginPath();
+                ctx.moveTo(0, y * PIXEL_SIZE);
+                ctx.lineTo(canvas.width, y * PIXEL_SIZE);
+                ctx.stroke();
+            }
+            
+            // Draw all visible layers
+            layers.forEach((layer, index) => {
+                if (layer.visible) {
+                    for (let y = 0; y < GRID_SIZE; y++) {
+                        for (let x = 0; x < GRID_SIZE; x++) {
+                            if (layer.data[y][x]) {
+                                ctx.fillStyle = layer.data[y][x];
+                                ctx.fillRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Update preview
+            updatePreview();
+        }
+        
+        // Update preview canvas
+        function updatePreview() {
+            // Clear preview
+            previewCtx.fillStyle = '#222';
+            previewCtx.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+            
+            // Draw all visible layers
+            layers.forEach(layer => {
+                if (layer.visible) {
+                    for (let y = 0; y < GRID_SIZE; y++) {
+                        for (let x = 0; x < GRID_SIZE; x++) {
+                            if (layer.data[y][x]) {
+                                previewCtx.fillStyle = layer.data[y][x];
+                                previewCtx.fillRect(x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Event listeners for drawing
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (currentTool === 'pencil') {
+                drawPixel(x, y);
+            } else if (currentTool === 'eraser') {
+                drawPixel(x, y, null);
+            } else if (currentTool === 'fill') {
+                const gridX = Math.floor(x / PIXEL_SIZE);
+                const gridY = Math.floor(y / PIXEL_SIZE);
+                const targetColor = getCurrentLayer().data[gridY][gridX];
+                
+                if (targetColor !== currentColor) {
+                    fillArea(x, y, targetColor, currentColor);
+                }
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (currentTool === 'pencil') {
+                drawPixel(x, y);
+            } else if (currentTool === 'eraser') {
+                drawPixel(x, y, null);
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            isDrawing = false;
+        });
+        
+        // Tool buttons
+        document.getElementById('pencil-tool').addEventListener('click', () => {
+            setActiveTool('pencil');
+        });
+        
+        document.getElementById('fill-tool').addEventListener('click', () => {
+            setActiveTool('fill');
+        });
+        
+        document.getElementById('eraser-tool').addEventListener('click', () => {
+            setActiveTool('eraser');
+        });
+        
+        document.getElementById('clear-tool').addEventListener('click', () => {
+            getCurrentLayer().data = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(null));
+            redrawCanvas();
+        });
+        
+        // Set active tool
+        function setActiveTool(tool) {
+            currentTool = tool;
+            
+            // Update button states
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(`${tool}-tool`).classList.add('active');
+        }
+        
+        // Layer management
+        document.getElementById('add-layer').addEventListener('click', () => {
+            if (layers.length < 6) {
+                layers.push(createEmptyLayer());
+                currentLayerIndex = layers.length - 1;
+                document.getElementById('current-layer').textContent = currentLayerIndex + 1;
+                redrawCanvas();
+            } else {
+                showNotification('Maksimal 6 layer sudah tercapai');
+            }
+        });
+        
+        // Animation controls
+        document.getElementById('play-animation').addEventListener('click', () => {
+            if (animationInterval) {
+                clearInterval(animationInterval);
+                animationInterval = null;
+                document.getElementById('play-animation').textContent = 'Putar Animasi';
+            } else {
+                const fps = parseInt(document.getElementById('fps-input').value) || 6;
+                let currentFrame = 0;
+                
+                animationInterval = setInterval(() => {
+                    // Hide all layers
+                    layers.forEach(layer => layer.visible = false);
+                    
+                    // Show current frame
+                    if (layers[currentFrame]) {
+                        layers[currentFrame].visible = true;
+                    }
+                    
+                    // Move to next frame
+                    currentFrame = (currentFrame + 1) % layers.length;
+                    
+                    redrawCanvas();
+                }, 1000 / fps);
+                
+                document.getElementById('play-animation').textContent = 'Hentikan Animasi';
+            }
+        });
+        
+        // AI Generation
+        document.getElementById('generate-btn').addEventListener('click', generateWithAI);
+        
+        // Quick suggestions
+        document.querySelectorAll('.suggestion').forEach(suggestion => {
+            suggestion.addEventListener('click', () => {
+                document.getElementById('ai-prompt').value = suggestion.dataset.prompt;
+                generateWithAI();
+            });
+        });
+        
+        // Generate with AI
+        function generateWithAI() {
+            const prompt = document.getElementById('ai-prompt').value.trim();
+            
+            if (!prompt) {
+                showNotification('Masukkan prompt terlebih dahulu');
+                return;
+            }
+            
+            // Show loading state
+            const generateBtn = document.getElementById('generate-btn');
+            generateBtn.textContent = 'Generating...';
+            generateBtn.disabled = true;
+            
+            // Simulate AI generation (in a real app, this would call an API)
+            setTimeout(() => {
+                // Generate random pixel art based on prompt
+                generatePixelArtFromPrompt(prompt);
+                
+                // Reset button
+                generateBtn.textContent = 'Generate dengan AI';
+                generateBtn.disabled = false;
+                
+                showNotification('Item berhasil di-generate dengan AI!');
+            }, 1500);
+        }
+        
+        // Generate pixel art based on prompt
+        function generatePixelArtFromPrompt(prompt) {
+            // Clear current layer
+            getCurrentLayer().data = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(null));
+            
+            // Simple algorithm to generate pixel art based on keywords
+            const lowerPrompt = prompt.toLowerCase();
+            
+            // Determine base colors based on prompt
+            let baseColors = [];
+            
+            if (lowerPrompt.includes('api') || lowerPrompt.includes('fire')) {
+                baseColors = ['#FF4500', '#FF0000', '#FFA500', '#FFFF00'];
+            } else if (lowerPrompt.includes('es') || lowerPrompt.includes('ice')) {
+                baseColors = ['#87CEEB', '#ADD8E6', '#0000FF', '#FFFFFF'];
+            } else if (lowerPrompt.includes('air') || lowerPrompt.includes('sky')) {
+                baseColors = ['#87CEEB', '#ADD8E6', '#FFFFFF', '#1E90FF'];
+            } else if (lowerPrompt.includes('earth') || lowerPrompt.includes('tanah')) {
+                baseColors = ['#8B4513', '#A0522D', '#CD853F', '#D2691E'];
+            } else if (lowerPrompt.includes('hijau') || lowerPrompt.includes('green')) {
+                baseColors = ['#008000', '#32CD32', '#90EE90', '#00FF00'];
+            } else if (lowerPrompt.includes('ungu') || lowerPrompt.includes('purple')) {
+                baseColors = ['#800080', '#9370DB', '#DA70D6', '#EE82EE'];
+            } else {
+                // Default random colors
+                baseColors = ['#FF4500', '#32CD32', '#1E90FF', '#FFD700', '#DA70D6', '#00CED1'];
+            }
+            
+            // Generate symmetric wings if prompt includes wings
+            if (lowerPrompt.includes('wings') || lowerPrompt.includes('sayap')) {
+                generateWings(baseColors);
+            } else {
+                // Generate random shape
+                generateRandomShape(baseColors);
+            }
+            
+            // Redraw canvas
+            redrawCanvas();
+        }
+        
+        // Generate wings shape
+        function generateWings(baseColors) {
+            const centerX = GRID_SIZE / 2;
+            
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    // Create symmetric wings
+                    const distFromCenter = Math.abs(x - centerX);
+                    const wingHeight = 8 + Math.sin(y / GRID_SIZE * Math.PI) * 6;
+                    
+                    if (distFromCenter > 4 && distFromCenter < wingHeight && y > 5 && y < 25) {
+                        // Add some randomness for texture
+                        if (Math.random() > 0.3) {
+                            const colorIndex = Math.floor(Math.random() * baseColors.length);
+                            getCurrentLayer().data[y][x] = baseColors[colorIndex];
+                            
+                            // Mirror to other wing
+                            const mirrorX = GRID_SIZE - 1 - x;
+                            getCurrentLayer().data[y][mirrorX] = baseColors[colorIndex];
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Generate random shape
+        function generateRandomShape(baseColors) {
+            // Create a random shape in the center
+            const centerX = GRID_SIZE / 2;
+            const centerY = GRID_SIZE / 2;
+            const maxRadius = 12;
+            
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const dist = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+                    
+                    if (dist < maxRadius && Math.random() > 0.5) {
+                        const colorIndex = Math.floor(Math.random() * baseColors.length);
+                        getCurrentLayer().data[y][x] = baseColors[colorIndex];
+                    }
+                }
+            }
+        }
+        
+        // Export item
+        document.getElementById('export-btn').addEventListener('click', () => {
+            // Create a data URL of the preview
+            const dataURL = previewCanvas.toDataURL('image/png');
+            
+            // Create a temporary link to download the image
+            const link = document.createElement('a');
+            link.download = 'growtopia-custom-item.png';
+            link.href = dataURL;
+            link.click();
+            
+            showNotification('Item berhasil di-export!');
+        });
+        
+        // Show notification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Initialize the app
+        initCanvas();
+        initColorPicker();
+        
+        // Add some sample pixels for demonstration
+        setTimeout(() => {
+            // Draw a simple sample
+            for (let i = 10; i < 22; i++) {
+                drawPixel(i * PIXEL_SIZE, 16 * PIXEL_SIZE, '#FF4500');
+            }
+        }, 500);
+    </script>
+</body>
+</html>
